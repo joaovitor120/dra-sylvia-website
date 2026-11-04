@@ -53,8 +53,8 @@ export default function Surgeries() {
             Você está cansado de usar óculos?
           </h2>
           <p className="col-span-12 max-w-[40ch] text-lead lg:col-span-5 lg:self-end" data-reveal>
-            São mais de 30 anos de oftalmologia. A Dra. Sylvia realiza cirurgias de miopia, hipermetropia, astigmatismo
-            e catarata, e a indicação de cada uma é feita em consulta.
+            São mais de 30 anos de oftalmologia. Miopia, hipermetropia, astigmatismo e catarata podem ser tratados com
+            cirurgia, e o primeiro passo é uma consulta para avaliar o seu caso.
           </p>
         </div>
 
@@ -94,12 +94,12 @@ export default function Surgeries() {
           <div data-reveal-item>
             <Button
               href={whatsappUrl(
-                'Oi, quero agendar uma avaliação para cirurgia (miopia, hipermetropia, astigmatismo ou catarata) com a Dra. Sylvia.',
+                'Oi, quero agendar uma consulta com a Dra. Sylvia para avaliar meu caso (miopia, hipermetropia, astigmatismo ou catarata).',
               )}
               variant="ink"
               magnetic
             >
-              Agendar avaliação para cirurgia
+              Agendar consulta
             </Button>
           </div>
         </div>

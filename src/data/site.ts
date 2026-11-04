@@ -63,9 +63,9 @@ export const services: readonly Service[] = [
   {
     id: 'cirurgias',
     name: 'Cirurgias oculares',
-    text: 'Cirurgias de miopia, hipermetropia, astigmatismo e catarata, com indicação feita após avaliação completa.',
+    text: 'Miopia, hipermetropia, astigmatismo e catarata: entenda cada condição e quando a cirurgia pode ser indicada.',
     action: 'Conhecer as cirurgias',
-    message: 'Oi, quero agendar uma avaliação para cirurgia com a Dra. Sylvia.',
+    message: 'Oi, quero agendar uma consulta com a Dra. Sylvia para conversar sobre cirurgia ocular.',
     href: '#cirurgias',
   },
   {
@@ -100,8 +100,8 @@ export const services: readonly Service[] = [
 ];
 
 /**
- * Cirurgias oculares. Texto informativo, sem promessa de resultado (publicidade médica):
- * a indicação de cada cirurgia é sempre feita em consulta.
+ * Cirurgias oculares. Texto só informativo: a Dra. Sylvia não opera, então a página explica
+ * as condições e as cirurgias sem dizer que ela as realiza, e sem promessa de resultado.
  * `kind` decide como a lente da página simula a visão antes da correção.
  */
 export type Surgery = {
@@ -159,7 +159,7 @@ export const reasons = [
 
 export const about = {
   education: 'Médica oftalmologista formada pela EMESCAM em 1994.',
-  practice: 'Oftalmologia geral, oftalmopediatria e cirurgias de miopia, hipermetropia, astigmatismo e catarata.',
+  practice: 'Oftalmologia geral e oftalmopediatria.',
   care: 'Um atendimento humano, acolhedor e ético, focado na prevenção, no diagnóstico e no acompanhamento da saúde ocular.',
   highlights: [
     'Atendimento humanizado e acolhedor',
@@ -233,7 +233,7 @@ export const faq = [
   { q: 'A clínica atende por convênio?', a: 'Sim, Unimed. Também há atendimento particular.' },
   {
     q: 'Quais procedimentos a Dra. Sylvia realiza?',
-    a: 'Consulta oftalmológica, cirurgias de miopia, hipermetropia, astigmatismo e catarata, acompanhamento de glaucoma, lentes de contato, urgência ocular, mapeamento de retina e outros exames oftalmológicos.',
+    a: 'Consulta oftalmológica, acompanhamento de glaucoma, lentes de contato, urgência ocular, mapeamento de retina e outros exames oftalmológicos.',
   },
   {
     q: 'Preciso levar exames anteriores?',
