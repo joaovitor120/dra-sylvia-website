@@ -1,7 +1,7 @@
 'use client';
 
 import { useLayoutEffect, useRef } from 'react';
-import { DESKTOP, MOTION_OK, ScrollTrigger, SplitText, gsap, useScene } from '@/lib/gsap';
+import { DESKTOP, MOTION_OK, ScrollTrigger, gsap, useScene } from '@/lib/gsap';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { Button, Photo, TextLink } from './ui';
 import TodayLine from './TodayLine';
@@ -28,9 +28,11 @@ export default function Hero() {
         y += el.offsetTop;
       }
       if (Math.abs(y - last) < 1) return;
+      const first = last < 0;
       last = y;
       hero.style.setProperty('--copy-bottom', `${Math.round(y)}px`);
-      ScrollTrigger.refresh();
+      // na primeira medida a página ainda vai ser medida pela camada de movimento
+      if (!first) ScrollTrigger.refresh();
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -48,29 +50,27 @@ export default function Hero() {
       const el = root.current!;
       const iris = el.querySelector<HTMLElement>('[data-hero="iris"]')!;
       const portrait = el.querySelector<HTMLElement>('.hero__portrait')!;
-      const title = el.querySelector<HTMLElement>('[data-hero="title"]')!;
-      const fades = el.querySelectorAll<HTMLElement>('[data-hero="fade"]');
       const copy = el.querySelector<HTMLElement>('.hero__copy')!;
       const inside = el.querySelector<HTMLElement>('.hero__inside')!;
+
+      // A abertura é só CSS (globals.css): começa no primeiro quadro, na GPU,
+      // sem disputar o processador com o carregamento da página.
+
+      // --- celular: nada preso e nada ampliado; só um parallax leve ao sair ---
+      if (!desktop) {
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
+          })
+          .to(copy, { yPercent: -18, opacity: 0 }, 0)
+          .to(iris, { yPercent: -8, scale: 1.06 }, 0);
+        return;
+      }
+
+      // --- desktop: a pupila dilata até cobrir a tela ---
       // a frase do capítulo seguinte passa a morar dentro da pupila
       document.documentElement.classList.add('hero-scene');
-
-      // --- abertura (até ~1,3 s) ---
-      const split = SplitText.create(title, { type: 'lines', mask: 'lines', linesClass: 'split-line' });
-      gsap.set(title, { opacity: 1 });
-      const intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
-      intro
-        .fromTo(
-          iris,
-          { clipPath: 'circle(0% at 50% 50%)' },
-          { clipPath: 'circle(71% at 50% 50%)', duration: 1.25, ease: 'power3.inOut' },
-          0,
-        )
-        .from(portrait, { scale: 1.14, duration: 1.6 }, 0.15)
-        .from(split.lines, { yPercent: 112, duration: 0.85, stagger: 0.08 }, 0.1)
-        .fromTo(fades, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.07 }, 0.4);
-
-      // --- saída: a pupila dilata até cobrir a tela ---
       const header = document.querySelector('.site-header');
       const coverScale = () => {
         const r = iris.getBoundingClientRect();
@@ -87,7 +87,7 @@ export default function Hero() {
         scrollTrigger: {
           trigger: el,
           start: 'top top',
-          end: desktop ? '+=120%' : '+=100%',
+          end: '+=120%',
           pin: true,
           scrub: true,
           invalidateOnRefresh: true,
@@ -107,15 +107,13 @@ export default function Hero() {
 
       return () => {
         document.documentElement.classList.remove('hero-scene');
-        split.revert();
         header?.classList.remove('is-dark');
       };
     });
-    ScrollTrigger.refresh();
   });
 
   return (
-    <section ref={root} id="inicio" className="hero" aria-labelledby="hero-title">
+    <section ref={root} id="inicio" className="hero" aria-labelledby="hero-title" suppressHydrationWarning>
       <div className="hero__iris" data-hero="iris" aria-hidden="true">
         <div className="hero__pupil">
           <div className="hero__view">
@@ -139,10 +137,13 @@ export default function Hero() {
 
       <div className="frame h-full">
         <div className="hero__copy">
-          <h1 id="hero-title" className="hero__title" data-hero="title">
-            Dra. Sylvia
-            <br />
-            Passamani
+          <h1 id="hero-title" className="hero__title">
+            <span className="hero__line">
+              <span>Dra. Sylvia</span>
+            </span>
+            <span className="hero__line">
+              <span>Passamani</span>
+            </span>
           </h1>
           <p className="hero__lead mt-8 max-w-[34rem] text-lead" data-hero="fade">
             Oftalmologista no Centro de Vitória/ES, com mais de 30 anos de experiência.
@@ -161,6 +162,18 @@ export default function Hero() {
           </div>
         </div>
       </div>
+
+      {/* Mede onde o texto termina já no HTML, antes da primeira pintura: o círculo
+          nasce no lugar certo, sem pular quando o JavaScript da página carrega. */}
+      <script
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: MEASURE_COPY_BOTTOM }}
+      />
     </section>
   );
 }
+
+const MEASURE_COPY_BOTTOM =
+  "(function(){var h=document.getElementById('inicio'),e=h&&h.querySelector('[data-hero-end]');if(!e)return;" +
+  'var y=e.offsetHeight;for(var n=e;n&&n!==h;n=n.offsetParent)y+=n.offsetTop;' +
+  "h.style.setProperty('--copy-bottom',Math.round(y)+'px')})()";

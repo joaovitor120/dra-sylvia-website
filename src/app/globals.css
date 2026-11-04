@@ -514,7 +514,8 @@ img {
   /* o círculo começa sempre abaixo do texto: --copy-bottom é medido pelo Hero.
      Sem script, 60svh. Assim nada escuro fica por cima da pupila preta. */
   .hero__iris {
-    --d: 132vw;
+    /* largo o bastante para a borda de baixo ser toda pupila: emenda sem costura na seção preta */
+    --d: 160vw;
     left: calc(50% - var(--d) / 2);
     top: max(calc(var(--copy-bottom, 60svh) + 1.75rem), 50svh);
   }
@@ -1285,15 +1286,83 @@ img {
   }
 }
 
-/* ---------- movimento: estados de entrada só existem com script ---------- */
+/* ---------- abertura: só CSS ----------
+   A entrada roda em CSS (translate, scale e opacity), que o navegador faz na GPU:
+   começa no primeiro quadro e não engasga enquanto o JavaScript ainda está
+   carregando. "backwards" segura o estado inicial só durante o atraso; ao terminar,
+   nada fica preso no elemento e a cena de rolagem do desktop assume livremente.
+   Sem script (sem .js) ou com movimento reduzido, a abertura aparece pronta. */
+
+.hero__line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.12em 0.06em;
+  margin-block: -0.12em -0.06em;
+}
+.hero__line > span {
+  display: block;
+}
+
+@keyframes hero-rise {
+  from {
+    translate: 0 112%;
+  }
+}
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+  }
+}
+@keyframes hero-portrait {
+  from {
+    scale: 1.12;
+  }
+}
+@keyframes hero-iris-open {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(71% at 50% 50%);
+  }
+}
+@keyframes hero-iris-rise {
+  from {
+    opacity: 0;
+    translate: 0 6%;
+    scale: 0.94;
+  }
+}
 
 @media (prefers-reduced-motion: no-preference) {
-  .js [data-hero='title'],
-  .js [data-hero='fade'] {
-    opacity: 0;
+  .js .hero__line > span {
+    animation: hero-rise 0.85s var(--ease-expo) 0.12s backwards;
   }
-  .js [data-hero='iris'] {
-    clip-path: circle(0% at 50% 50%);
+  .js .hero__line + .hero__line > span {
+    animation-delay: 0.2s;
+  }
+  .js [data-hero='fade'] {
+    animation: hero-fade 0.8s var(--ease-expo) 0.4s backwards;
+  }
+  .js [data-hero='fade'] + [data-hero='fade'] {
+    animation-delay: 0.47s;
+  }
+  .js [data-hero='fade'] + [data-hero='fade'] + [data-hero='fade'] {
+    animation-delay: 0.54s;
+  }
+  .js .hero__portrait {
+    animation: hero-portrait 1.4s var(--ease-expo) 0.1s backwards;
+  }
+  /* desktop: a íris abre como um obturador */
+  .js .hero__iris {
+    animation: hero-iris-open 1.2s var(--ease-in-out) backwards;
+  }
+  /* celular: só sobe e aparece (transform e opacidade, sem recorte a cada quadro) */
+  @media (max-width: 1099px) {
+    .js .hero__iris {
+      animation: hero-iris-rise 0.9s var(--ease-expo) backwards;
+    }
   }
 }
 
