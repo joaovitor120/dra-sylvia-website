@@ -257,6 +257,12 @@ img {
   font-weight: 600;
   padding-block: 0.4rem;
 }
+/* no toque, todo link tem pelo menos 44px de altura */
+@media (pointer: coarse) {
+  .u-link {
+    min-height: 44px;
+  }
+}
 .u-link::after {
   content: '';
   position: absolute;
@@ -505,10 +511,12 @@ img {
 }
 
 @media (max-width: 1099px) {
+  /* o círculo começa sempre abaixo do texto: --copy-bottom é medido pelo Hero.
+     Sem script, 60svh. Assim nada escuro fica por cima da pupila preta. */
   .hero__iris {
     --d: 132vw;
     left: calc(50% - var(--d) / 2);
-    top: 60svh;
+    top: max(calc(var(--copy-bottom, 60svh) + 1.75rem), 50svh);
   }
   .hero__view {
     width: 100vw;
@@ -528,11 +536,23 @@ img {
   }
   .hero__copy {
     justify-content: flex-start;
-    padding-top: clamp(6rem, 14svh, 9rem);
+    padding-top: clamp(6rem, 13svh, 8.5rem);
     max-width: 40rem;
   }
   .hero__title {
-    font-size: min(11.5vw, 8.2svh);
+    font-size: min(11.5vw, 7.6svh);
+  }
+  .hero__lead {
+    margin-top: 1.25rem;
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+  .hero__actions {
+    margin-top: 1.75rem;
+  }
+  /* no celular a rolagem já leva aos procedimentos; o link só disputava espaço com o retrato */
+  .hero__more {
+    display: none;
   }
 }
 
@@ -942,18 +962,31 @@ img {
   transform: scale(0.45);
   transition: transform var(--t-ui) var(--ease-out);
 }
+/* no celular não há cena presa: as fotos são um carrossel de deslizar com o dedo,
+   com a próxima aparecendo na borda para mostrar que há mais */
 @media (max-width: 899px) {
   .clinic-grid {
-    grid-template-columns: 1fr;
-    max-width: 30rem;
+    display: flex;
+    gap: 1rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.5rem var(--gutter) 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
-  .clinic.scene-on .clinic-stage {
-    align-items: start;
-    padding-top: 6.5rem;
+  .clinic-grid::-webkit-scrollbar {
+    display: none;
   }
-  .clinic.scene-on .clinic-grid {
-    width: min(78vw, 46svh);
-    margin: 1.75rem auto 0;
+  .clinic-figure {
+    flex: 0 0 min(74vw, 20rem);
+    scroll-snap-align: start;
+  }
+  .clinic-figure img {
+    box-sizing: border-box;
+    padding: clamp(0.45rem, 1.6vw, 0.6rem);
+    background: var(--gold);
   }
 }
 
@@ -1217,6 +1250,14 @@ img {
 }
 .wa-fab:active {
   transform: scale(0.95);
+}
+.wa-fab.is-away {
+  transform: translateY(160%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 420ms var(--ease-out),
+    opacity 300ms ease;
 }
 .wa-fab__ring {
   position: absolute;

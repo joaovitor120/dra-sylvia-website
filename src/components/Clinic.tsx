@@ -15,7 +15,8 @@ export default function Clinic() {
   const [active, setActive] = useState(0);
 
   useScene(root, (mm) => {
-    mm.add(MOTION_OK, () => {
+    // a cena presa só no desktop; no celular as fotos ficam num carrossel (ver globals.css)
+    mm.add(`${MOTION_OK} and (min-width: 900px)`, () => {
       const el = root.current!;
       el.classList.add('scene-on');
       const figures = gsap.utils.toArray<HTMLElement>('.clinic-figure', el);

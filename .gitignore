@@ -12,3 +12,7 @@ next-env.d.ts
 
 # originais das fotos: ficam em old_landing_page/assets (ver scripts/optimize-images.mjs)
 scripts/source/
+
+# arquivos que o next dev gera para assistentes de código
+AGENTS.md
+CLAUDE.md

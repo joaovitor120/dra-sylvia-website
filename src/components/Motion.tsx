@@ -70,12 +70,14 @@ export default function Motion() {
       });
 
       // ---- foco: do borrado ao nítido conforme a linha sobe na tela ----
+      // no celular, só a opacidade: desfoque animado em texto grande pesa em aparelhos simples
+      const light = window.matchMedia('(max-width: 899px), (pointer: coarse)').matches;
       gsap.utils.toArray<HTMLElement>('[data-focus]').forEach((el) => {
         gsap.fromTo(
           el,
-          { filter: 'blur(14px)', opacity: 0.28 },
+          light ? { opacity: 0.22 } : { filter: 'blur(14px)', opacity: 0.28 },
           {
-            filter: 'blur(0px)',
+            ...(light ? {} : { filter: 'blur(0px)' }),
             opacity: 1,
             ease: 'none',
             scrollTrigger: { trigger: el, start: 'top 95%', end: 'top 52%', scrub: true },

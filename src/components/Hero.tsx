@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { DESKTOP, MOTION_OK, ScrollTrigger, SplitText, gsap, useScene } from '@/lib/gsap';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { Button, Photo, TextLink } from './ui';
@@ -13,6 +13,31 @@ import { Statement } from './Prevention';
  */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+
+  // No celular o círculo começa logo abaixo do texto (--copy-bottom), qualquer que
+  // seja a altura útil da tela. Medido antes da cena, que calcula a escala a partir dele.
+  useLayoutEffect(() => {
+    const hero = root.current;
+    const end = hero?.querySelector<HTMLElement>('[data-hero-end]');
+    if (!hero || !end) return;
+    let last = -1;
+    const measure = () => {
+      // offsetTop ignora o deslocamento da animação de entrada
+      let y = end.offsetHeight;
+      for (let el: HTMLElement | null = end; el && el !== hero; el = el.offsetParent as HTMLElement | null) {
+        y += el.offsetTop;
+      }
+      if (Math.abs(y - last) < 1) return;
+      last = y;
+      hero.style.setProperty('--copy-bottom', `${Math.round(y)}px`);
+      ScrollTrigger.refresh();
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(hero);
+    ro.observe(end);
+    return () => ro.disconnect();
+  }, []);
 
   useScene(root, (mm) => {
     mm.add({ motion: MOTION_OK, desktop: DESKTOP }, (ctx) => {
@@ -119,14 +144,16 @@ export default function Hero() {
             <br />
             Passamani
           </h1>
-          <p className="mt-8 max-w-[34rem] text-lead" data-hero="fade">
+          <p className="hero__lead mt-8 max-w-[34rem] text-lead" data-hero="fade">
             Oftalmologista no Centro de Vitória/ES, com mais de 30 anos de experiência.
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4" data-hero="fade">
+          <div className="hero__actions mt-9 flex flex-wrap items-center gap-x-7 gap-y-4" data-hero="fade" data-hero-end>
             <Button href={whatsappUrl()} variant="ink" magnetic>
               Agendar pelo WhatsApp
             </Button>
-            <TextLink href="#procedimentos">Ver procedimentos</TextLink>
+            <TextLink href="#procedimentos" className="hero__more">
+              Ver procedimentos
+            </TextLink>
           </div>
           <div className="mt-8 hidden items-center gap-3 text-small min-[1100px]:flex" data-hero="fade">
             <span className="hero__status-dot" aria-hidden="true" />
