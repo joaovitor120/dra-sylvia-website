@@ -161,7 +161,7 @@ export default function Header() {
               <a
                 key={l.href}
                 href={l.href}
-                className="menu-item text-[clamp(2.25rem,10vw,4.5rem)] font-medium leading-[1.1] tracking-[-0.04em]"
+                className="menu-item font-medium tracking-[-0.04em]"
                 style={{ transitionDelay: open ? `${180 + i * 60}ms` : '0ms' }}
                 onClick={() => setOpen(false)}
                 tabIndex={open ? 0 : -1}

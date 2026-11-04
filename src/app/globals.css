@@ -355,6 +355,7 @@ img {
   position: fixed;
   inset: 0;
   z-index: 60;
+  overflow-y: auto; /* só em telas muito baixas (celular deitado) */
   background: var(--ink);
   color: var(--ivory);
   clip-path: circle(0% at calc(100% - 2.5rem) 2.5rem);
@@ -370,7 +371,10 @@ img {
     clip-path 800ms var(--ease-in-out),
     visibility 0s;
 }
+/* o tamanho respeita a largura e a altura: as sete opções e o botão sempre cabem na tela */
 .menu-panel a.menu-item {
+  font-size: clamp(1.5rem, min(10vw, calc((100svh - 17rem) / 9)), 4.5rem);
+  line-height: 1.1;
   position: relative;
   display: flex;
   align-items: center;
