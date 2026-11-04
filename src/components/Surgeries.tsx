@@ -53,8 +53,8 @@ export default function Surgeries() {
             Você está cansado de usar óculos?
           </h2>
           <p className="col-span-12 max-w-[40ch] text-lead lg:col-span-5 lg:self-end" data-reveal>
-            São mais de 30 anos de oftalmologia. Miopia, hipermetropia, astigmatismo e catarata podem ser tratados com
-            cirurgia, e o primeiro passo é uma consulta para avaliar o seu caso.
+            Miopia, hipermetropia, astigmatismo e catarata podem ser tratados com cirurgia, e o primeiro passo é uma
+            consulta para avaliar o seu caso.
           </p>
         </div>
 
