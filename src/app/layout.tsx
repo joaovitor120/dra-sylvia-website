@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           as="image"
           href="/images/sylvia-retrato-960.webp"
           imageSrcSet="/images/sylvia-retrato-640.webp 640w, /images/sylvia-retrato-960.webp 960w, /images/sylvia-retrato-1280.webp 1280w"
-          imageSizes="(max-width: 1099px) 64vw, 72svh"
+          imageSizes="(max-width: 1099px) 80vw, 72svh"
           fetchPriority="high"
         />
       </head>

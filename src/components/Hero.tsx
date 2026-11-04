@@ -120,7 +120,7 @@ export default function Hero() {
             <Photo
               name="sylvia-retrato"
               widths={[640, 960, 1280]}
-              sizes="(max-width: 1099px) 64vw, 72svh"
+              sizes="(max-width: 1099px) 80vw, 72svh"
               alt=""
               width={1086}
               height={1448}
