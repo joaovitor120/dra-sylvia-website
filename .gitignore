@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.env*.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+.taste-skill
+.playwright-cli
+.claude
+
+# originais das fotos: ficam em old_landing_page/assets (ver scripts/optimize-images.mjs)
+scripts/source/
