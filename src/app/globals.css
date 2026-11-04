@@ -730,13 +730,17 @@ img {
   grid-column: 2 / span 6;
   grid-row: 1;
 }
+/* no celular: primeiro o problema, depois a lente que mostra como ele se vê */
 @media (max-width: 899px) {
-  .surgery__lens,
-  .surgery:nth-child(even) .surgery__lens,
   .surgery__body,
   .surgery:nth-child(even) .surgery__body {
     grid-column: 1 / -1;
-    grid-row: auto;
+    grid-row: 1;
+  }
+  .surgery__lens,
+  .surgery:nth-child(even) .surgery__lens {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 }
 
