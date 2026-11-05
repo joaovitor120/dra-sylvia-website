@@ -20,29 +20,28 @@ export default function Motion() {
 
     mm.add(MOTION_OK, (self) => {
       // ---- rolagem ----
-      lenis = new Lenis({ lerp: 0.12, anchors: { offset: -72 }, autoRaf: false });
-      (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
-      lenis.on('scroll', ScrollTrigger.update);
+      // Lenis só com mouse/trackpad. No toque ele não suaviza nada e só custaria um
+      // laço a mais: celular e tablet ficam com a rolagem nativa, a mais fluida.
+      const touch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+      if (!touch) {
+        lenis = new Lenis({ lerp: 0.12, anchors: { offset: -72 }, autoRaf: false });
+        (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+        lenis.on('scroll', ScrollTrigger.update);
+      }
       const tick = (time: number) => lenis?.raf(time * 1000);
-      gsap.ticker.add(tick);
-      gsap.ticker.lagSmoothing(0);
+      if (lenis) {
+        gsap.ticker.add(tick);
+        gsap.ticker.lagSmoothing(0);
+      }
 
       // As entradas das seções são montadas quando o navegador fica livre, para não
       // disputar o processador com a hidratação e com a abertura.
-      // No celular os títulos entram inteiros, sem SplitText.
       const small = window.matchMedia('(max-width: 899px)').matches;
+      // no celular com animação ligada à rolagem, o foco da tabela é CSS (globals.css)
+      const focusByCss = small && CSS.supports('animation-timeline: view()');
       const entrances = () => {
         // ---- títulos linha a linha ----
         gsap.utils.toArray<HTMLElement>('[data-split]').forEach((el) => {
-          if (small) {
-            gsap.from(el, {
-              y: 28,
-              opacity: 0,
-              duration: 0.9,
-              scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-            });
-            return;
-          }
           SplitText.create(el, {
             type: 'lines',
             mask: 'lines',
@@ -86,7 +85,7 @@ export default function Motion() {
         // ---- foco: do borrado ao nítido conforme a linha sobe na tela ----
         // no celular, só a opacidade: desfoque animado em texto grande pesa em aparelhos simples
         const light = window.matchMedia('(max-width: 899px), (pointer: coarse)').matches;
-        gsap.utils.toArray<HTMLElement>('[data-focus]').forEach((el) => {
+        if (!focusByCss) gsap.utils.toArray<HTMLElement>('[data-focus]').forEach((el) => {
           gsap.fromTo(
             el,
             light ? { opacity: 0.22 } : { filter: 'blur(14px)', opacity: 0.28 },

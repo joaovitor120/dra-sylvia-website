@@ -28,6 +28,8 @@ export default function Clinic() {
         defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: stage,
+          // a seção já envolve o palco: o GSAP usa ela como espaçador, sem mover nada no HTML
+          pinSpacer: el,
           start: 'top top',
           end: '+=130%',
           pin: true,

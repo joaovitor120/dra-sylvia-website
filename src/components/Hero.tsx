@@ -52,26 +52,48 @@ export default function Hero() {
       const portrait = el.querySelector<HTMLElement>('.hero__portrait')!;
       const copy = el.querySelector<HTMLElement>('.hero__copy')!;
       const inside = el.querySelector<HTMLElement>('.hero__inside')!;
+      const header = document.querySelector('.site-header');
 
       // A abertura é só CSS (globals.css): começa no primeiro quadro, na GPU,
       // sem disputar o processador com o carregamento da página.
 
-      // --- celular: nada preso e nada ampliado; só um parallax leve ao sair ---
+      // a frase do capítulo seguinte passa a morar dentro da pupila
+      document.documentElement.classList.add('hero-scene');
+
+      // --- celular e tablet: a mesma pupila que dilata, feita para não travar ---
+      // O palco fica preso por position: sticky (nativo) e a cena é só opacidade e
+      // escala: o texto sobe, um disco preto escurece a foto e cresce até cobrir a tela.
+      // Onde o navegador tem animação ligada à rolagem (Chrome/Android), ela roda em
+      // CSS, na GPU (globals.css); nos demais, o GSAP faz o mesmo movimento.
       if (!desktop) {
-        gsap
-          .timeline({
-            defaults: { ease: 'none' },
-            scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
-          })
-          .to(copy, { yPercent: -18, opacity: 0 }, 0)
-          .to(iris, { yPercent: -8, scale: 1.06 }, 0);
-        return;
+        const dilate = el.querySelector<HTMLElement>('.hero__dilate')!;
+        const view = el.querySelector<HTMLElement>('.hero__view')!;
+        const byCss = CSS.supports('animation-timeline: scroll()');
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: el,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: byCss ? false : 0.25,
+            onUpdate: (self) => header?.classList.toggle('is-dark', self.progress > 0.6),
+          },
+        });
+        if (!byCss) {
+          tl.to(copy, { yPercent: -10, opacity: 0, duration: 0.28 }, 0)
+            .to(view, { scale: 1.08, duration: 0.45 }, 0)
+            .to(dilate, { opacity: 1, duration: 0.2 }, 0.22)
+            .to(dilate, { scale: 3.4, duration: 0.46, ease: 'power2.in' }, 0.42)
+            .fromTo(inside, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.16 }, 0.72)
+            .to({}, { duration: 0.12 });
+        }
+        return () => {
+          document.documentElement.classList.remove('hero-scene');
+          header?.classList.remove('is-dark');
+        };
       }
 
       // --- desktop: a pupila dilata até cobrir a tela ---
-      // a frase do capítulo seguinte passa a morar dentro da pupila
-      document.documentElement.classList.add('hero-scene');
-      const header = document.querySelector('.site-header');
       const coverScale = () => {
         const r = iris.getBoundingClientRect();
         const cx = r.left + r.width / 2;
@@ -89,6 +111,9 @@ export default function Hero() {
           start: 'top top',
           end: '+=120%',
           pin: true,
+          // usa o invólucro que já está no HTML: sem tirar a seção do lugar, a entrada
+          // (CSS) não reinicia quando a cena é montada
+          pinSpacer: el.parentElement!,
           scrub: true,
           invalidateOnRefresh: true,
           // é a primeira cena presa: medida antes das outras, inclusive quando é recriada no resize
@@ -113,63 +138,71 @@ export default function Hero() {
   });
 
   return (
-    <section ref={root} id="inicio" className="hero" aria-labelledby="hero-title" suppressHydrationWarning>
-      <div className="hero__iris" data-hero="iris" aria-hidden="true">
-        <div className="hero__pupil">
-          <div className="hero__view">
-            <Photo
-              name="sylvia-retrato"
-              widths={[640, 960, 1280]}
-              sizes="(max-width: 1099px) 80vw, 72svh"
-              alt=""
-              width={1086}
-              height={1448}
-              className="hero__portrait"
-              priority
-            />
+    // invólucro do pin do desktop (pinSpacer): o GSAP prende a seção dentro dele sem movê-la
+    <div className="hero-pin">
+      <section ref={root} id="inicio" className="hero" aria-labelledby="hero-title" suppressHydrationWarning>
+        {/* no celular o palco fica preso (sticky) enquanto a pupila dilata */}
+        <div className="hero__stage">
+          <div className="hero__iris" data-hero="iris" aria-hidden="true">
+            <div className="hero__pupil">
+              <div className="hero__view">
+                <Photo
+                  name="sylvia-retrato"
+                  widths={[640, 960, 1280]}
+                  sizes="(max-width: 1099px) 80vw, 72svh"
+                  alt=""
+                  width={1086}
+                  height={1448}
+                  className="hero__portrait"
+                  priority
+                />
+              </div>
+            </div>
+            {/* disco preto da pupila que cresce na cena do celular */}
+            <span className="hero__dilate" />
+          </div>
+
+          <div className="hero__inside frame">
+            <Statement reveal={false} />
+          </div>
+
+          <div className="frame h-full">
+            <div className="hero__copy">
+              <h1 id="hero-title" className="hero__title">
+                <span className="hero__line">
+                  <span>Dra. Sylvia</span>
+                </span>
+                <span className="hero__line">
+                  <span>Passamani</span>
+                </span>
+              </h1>
+              <p className="hero__lead mt-8 max-w-[34rem] text-lead" data-hero="fade">
+                Oftalmologista no Centro de Vitória/ES, com mais de 30 anos de experiência.
+              </p>
+              <div className="hero__actions mt-9 flex flex-wrap items-center gap-x-7 gap-y-4" data-hero="fade" data-hero-end>
+                <Button href={whatsappUrl()} variant="ink" magnetic>
+                  Agendar pelo WhatsApp
+                </Button>
+                <TextLink href="#procedimentos" className="hero__more">
+                  Ver procedimentos
+                </TextLink>
+              </div>
+              <div className="mt-8 hidden items-center gap-3 text-small min-[1100px]:flex" data-hero="fade">
+                <span className="hero__status-dot" aria-hidden="true" />
+                <TodayLine />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="hero__inside frame">
-        <Statement reveal={false} />
-      </div>
-
-      <div className="frame h-full">
-        <div className="hero__copy">
-          <h1 id="hero-title" className="hero__title">
-            <span className="hero__line">
-              <span>Dra. Sylvia</span>
-            </span>
-            <span className="hero__line">
-              <span>Passamani</span>
-            </span>
-          </h1>
-          <p className="hero__lead mt-8 max-w-[34rem] text-lead" data-hero="fade">
-            Oftalmologista no Centro de Vitória/ES, com mais de 30 anos de experiência.
-          </p>
-          <div className="hero__actions mt-9 flex flex-wrap items-center gap-x-7 gap-y-4" data-hero="fade" data-hero-end>
-            <Button href={whatsappUrl()} variant="ink" magnetic>
-              Agendar pelo WhatsApp
-            </Button>
-            <TextLink href="#procedimentos" className="hero__more">
-              Ver procedimentos
-            </TextLink>
-          </div>
-          <div className="mt-8 hidden items-center gap-3 text-small min-[1100px]:flex" data-hero="fade">
-            <span className="hero__status-dot" aria-hidden="true" />
-            <TodayLine />
-          </div>
-        </div>
-      </div>
-
-      {/* Mede onde o texto termina já no HTML, antes da primeira pintura: o círculo
-          nasce no lugar certo, sem pular quando o JavaScript da página carrega. */}
-      <script
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: MEASURE_COPY_BOTTOM }}
-      />
-    </section>
+        {/* Mede onde o texto termina já no HTML, antes da primeira pintura: o círculo
+            nasce no lugar certo, sem pular quando o JavaScript da página carrega. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: MEASURE_COPY_BOTTOM }}
+        />
+      </section>
+    </div>
   );
 }
 

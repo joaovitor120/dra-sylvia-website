@@ -43,6 +43,14 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* âncoras param abaixo do cabeçalho fixo */
+  scroll-padding-top: 5.5rem;
+}
+/* sem Lenis (toque), as âncoras do menu deslizam pela rolagem nativa */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 html.lenis,
@@ -461,12 +469,27 @@ img {
   background: var(--gold);
   will-change: transform;
 }
+.hero__stage {
+  position: relative;
+  height: 100%;
+}
 .hero__pupil {
   position: absolute;
   inset: 2.6%;
   border-radius: 50%;
   background: var(--pupil);
   overflow: hidden;
+}
+/* disco preto do tamanho da pupila: na cena do celular escurece a foto e cresce até
+   cobrir a tela. Só opacidade e escala, para o navegador fazer tudo na GPU. */
+.hero__dilate {
+  position: absolute;
+  inset: 2.6%;
+  border-radius: 50%;
+  background: var(--pupil);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
 }
 /* camada do tamanho da tela dentro da pupila: posiciona o retrato em coordenadas da tela */
 .hero__view {
@@ -517,7 +540,14 @@ img {
   .hero {
     --hero-h: max(100svh, 520px);
     --iris-top: max(calc(var(--copy-bottom, 60svh) + 1.75rem), 50svh);
-    min-height: 520px;
+    height: var(--hero-h);
+    min-height: 0;
+    /* clip (e não hidden) para o palco poder ficar preso com sticky */
+    overflow: clip;
+  }
+  .hero__stage {
+    height: var(--hero-h);
+    overflow: hidden;
   }
   .hero__iris {
     /* largo o bastante para a borda de baixo ser toda pupila: emenda sem costura na seção preta */
@@ -563,6 +593,92 @@ img {
   /* no celular a rolagem já leva aos procedimentos; o link só disputava espaço com o retrato */
   .hero__more {
     display: none;
+  }
+}
+
+
+/* ---------- abertura no celular e tablet: a pupila dilata ----------
+   O hero ganha ~90svh de rolagem e o palco fica preso (sticky nativo, sem JS de pin).
+   Com animation-timeline (Chrome/Android) a cena é CSS ligada à rolagem e roda na GPU;
+   sem ela, o GSAP do Hero faz o mesmo. A classe hero-scene vem do Hero, só com movimento. */
+@media (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+  .hero-scene .hero {
+    --scene: 90svh;
+    height: calc(var(--hero-h) + var(--scene));
+  }
+  .hero-scene .hero__stage {
+    position: sticky;
+    top: 0;
+  }
+}
+
+@keyframes scene-copy {
+  28%,
+  100% {
+    opacity: 0;
+    translate: 0 -10%;
+  }
+}
+@keyframes scene-view {
+  45%,
+  100% {
+    scale: 1.08;
+  }
+}
+@keyframes scene-dilate {
+  0%,
+  22% {
+    opacity: 0;
+    scale: 1;
+  }
+  42% {
+    opacity: 1;
+    scale: 1;
+  }
+  88%,
+  100% {
+    opacity: 1;
+    scale: 3.4;
+  }
+}
+@keyframes scene-inside {
+  0%,
+  72% {
+    opacity: 0;
+    translate: 0 40px;
+    visibility: hidden;
+  }
+  88%,
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    visibility: visible;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+    .hero-scene .hero__copy,
+    .hero-scene .hero__view,
+    .hero-scene .hero__dilate,
+    .hero-scene .hero__inside {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+      animation-range: 0 var(--scene);
+    }
+    .hero-scene .hero__copy {
+      animation-name: scene-copy;
+    }
+    .hero-scene .hero__view {
+      animation-name: scene-view;
+    }
+    .hero-scene .hero__dilate {
+      animation-name: scene-dilate;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+    }
+    .hero-scene .hero__inside {
+      animation-name: scene-inside;
+    }
   }
 }
 
@@ -648,6 +764,46 @@ img {
   }
   .chart__row:nth-child(4) .chart__title {
     font-size: 7.2vw;
+  }
+}
+
+/* No celular com animação ligada à rolagem (Chrome/Android), o foco da tabela e a
+   chegada do carrossel do consultório são CSS: rodam na GPU, presos à rolagem. */
+@keyframes chart-focus {
+  from {
+    filter: blur(10px);
+    opacity: 0.22;
+    scale: 1.04;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes clinic-drift {
+  from {
+    translate: 26% 0;
+    opacity: 0.35;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
+    .js .chart__title {
+      transform-origin: left center;
+      animation: chart-focus linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+    .js .clinic-grid {
+      animation: clinic-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
   }
 }
 
